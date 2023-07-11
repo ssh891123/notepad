@@ -30,11 +30,7 @@ const PlusCard = styled.div`
 function App() {
   const [mode, setMode] = useState<'edit' | 'view'>('view');
   const [memoList, setMemoList] = useState<Memo[]>([]);
-  // useState<Memo[]>(() => {
-  // const memo = JSON.parse((Cookies.get('memo') ?? null)!);
-  // const memoList: Memo[] = memo ?? [];
-  // return memoList;
-  // })
+  const [selectedMemoIdx, setSelectedMemoIdx] = useState<number | null>(null); 
 
   // view가 변경될때마다 확인
   // useState를 통해서도 memoList에 저장 가능하지만, [저장]하고 나서 렌더링되지 않음
@@ -51,13 +47,28 @@ function App() {
         mode === "view" &&
         <CardContainer>
           {
-            memoList.map(memo => <Card title={memo.title}/>)
+            memoList.map((memo, idx) => <Card 
+              key={idx}
+              onClick={() => {
+                setSelectedMemoIdx(idx);
+                setMode('edit');
+              }}
+              title={memo.title} />)
           }
-          <PlusCard onClick={() => setMode("edit")}>+</PlusCard>
+          <PlusCard onClick={() => {
+            //+ 눌렀을 때, selectedMemoIdx가 null이 되어야 함
+            setSelectedMemoIdx(null); 
+            setMode("edit");
+          }}>+</PlusCard>
+          <PlusCard onClick={() => {
+            setSelectedMemoIdx(null);
+            setMemoList([]); 
+            Cookies.remove('memo');
+          }}>Clear</PlusCard>
         </CardContainer>
       }
       {
-        mode === "edit" && <Edit setMode={setMode}/>
+        mode === "edit" && <Edit setMode={setMode} memoIdx={selectedMemoIdx}/>
       }
     </>
   );

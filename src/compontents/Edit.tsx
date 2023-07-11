@@ -26,12 +26,27 @@ const ButtonContainer = styled.div`
 
 interface EditProps {
     setMode: (mode: 'edit' | 'view') => void;
+    memoIdx: number | null;
 }
 
 
-const Edit = ({ setMode }: EditProps) => {
-    const [title, setTitle] = useState('');
-    const [contents, setContents] = useState('');
+const Edit = ({ setMode, memoIdx }: EditProps) => {
+    const [title, setTitle] = useState(() => {
+        if (Number.isInteger(memoIdx))  {
+            const memo = JSON.parse((Cookies.get('memo') ?? null)!);
+            const memoList: Memo[] = memo ?? [];
+            return memoList[memoIdx as number].title;
+        }
+        return '';
+    });
+    const [contents, setContents] = useState(() => {
+        if (Number.isInteger(memoIdx))  {
+            const memo = JSON.parse((Cookies.get('memo') ?? null)!);
+            const memoList: Memo[] = memo ?? [];
+            return memoList[memoIdx as number].contents;
+        }
+        return '';
+    });
     return <EditContainer>
         
         <TitleInp value={title} onChange={event => setTitle(event.target.value)}/>
@@ -49,10 +64,17 @@ const Edit = ({ setMode }: EditProps) => {
                 //memo가 undefined 이면 null로 반환
                 const memo = JSON.parse((Cookies.get('memo') ?? null)!);
                 const memoList:Memo[] = memo ?? [];
-                memoList.push({
-                    title, 
-                    contents,
-                })
+                if(Number.isInteger(memoIdx))
+                    memoList[memoIdx as number] = {
+                        title,
+                        contents
+                    }
+                else 
+                    memoList.push({
+                        title,
+                        contents
+                    })
+
                 Cookies.set('memo', JSON.stringify(memoList)); //Coocie에 저장
                 alert('저장되었습니다');
                 setMode("view");
